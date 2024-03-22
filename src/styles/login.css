@@ -1,0 +1,259 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    
+}
+
+.body{
+    background-color: #5296b5;
+    flex-direction: row;
+    font-family: "Josefin Sans", sans-serif;
+}
+
+
+.container{
+    width: 100%;
+    padding: 0;
+    background-color: #457e99;
+}
+
+.container-login{
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+    margin: 0;
+}
+
+/*estilização wrap-login*/
+.wrap-login{
+    width: 390px;
+    background-color: #457e99;
+    border-radius: 30px;
+
+    overflow: hidden;
+    padding: 77px 55px 33px 55px;
+    box-shadow: 0px 5px 10px 6px rgba(0, 0, 0, 0.2);
+}
+
+/*estilização login-form-title*/
+.login-form-title{
+    display: block;
+    font-size: 20px;
+    color: white;
+
+    line-height: 3;
+    text-align: center;
+}
+
+/*estilização login-form*/
+.login-form{
+    width: 100%;
+}
+
+/*tamanho imagem*/
+.login-form-title img{
+    width: 225px;
+    margin-bottom: 40px;
+}
+
+/*estilização do wrap-input*/
+.wrap-input{
+    width: 100%;
+    position: relative;
+    border-bottom: 2px solid #adadad;
+    margin-bottom: 40px;
+}
+
+/*estilização dos inputs*/
+.input{
+    font-size: 15px;
+    color: #fff;
+    line-height: 1.5;
+    border: none;
+    display: block;
+
+    width: 100%;
+    height: 45px;
+    
+    background-color: transparent;
+
+    padding: 0 5px;
+}
+
+/*estilização da caixa de login e senha*/
+.focus-input{
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    top: 0;
+    left: 0;
+
+    pointer-events: none;
+    color: #adad;
+}
+
+/*estilização da barrinha abaixo dos inputs antes do click*/
+.focus-input::before{
+    content: "";
+    display: block;
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+
+    -webkit-transition: all 0.5s;
+    -o-transition: all 0.5s;
+    -moz-transition: all 0.5s;
+
+    /*para ter compactibilidade com outros browsers*/
+    background: -webkit-linear-gradient(to left, #003459, #4ed4e2);
+    background: -o-linear-gradient(to left, #003459, #4ed4e2);
+    background: -moz-linear-gradient(to left, #003459, #4ed4e2);
+    background: linear-gradient(to left, #003459, #4ed4e2);
+}
+
+/*estilização da barrinha abaixo dos inputs depois do click*/
+.focus-input::after{
+    font-size: 15px;
+    color: white;
+    line-height: 1.5;
+
+    content: attr(data-placeholder);
+
+    display: block;
+    width: 100%;
+    position: absolute;
+    top: 16px;
+    left: opx;
+
+    padding-left: 5px;
+
+    -webkit-transition: all 0.2s;
+    -o-transition: all 0.2s;
+    -moz-transition: all 0.2s;
+}
+
+/*tirar a seleção do input*/
+.input:focus{
+    outline: 0;
+}
+
+/**/
+.input:focus + .focus-input::after{
+    top: -15px;
+}
+
+.input:focus + .focus-input::before{
+    width: 100%;
+}
+
+.has-val + .focus-input::after{
+    top: -15px;
+}
+
+.container-login-form-btn{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-bottom: 13px;
+}
+
+.login-form-btn{
+    font-size: 15px;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-transform: uppercase;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    height: 50px;
+
+    background-color: #5296b5;
+}
+
+.login-form-btn:hover{
+    cursor: pointer;
+}
+
+/*CSS da Home*/
+
+
+/*headerr*/
+.nav_div{
+    background-color:#266683;
+    height: 70px;
+    width: 100%;
+    position: fixed;
+    z-index: 1;
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+    box-shadow: 0px 20px 20px 10px rgba(0, 0, 0, 0.25);
+}
+/*posição das imagem*/
+.logo_nav{
+    width: 225px;
+    top: 8px;
+    left: 20px;
+    border-radius: 0;
+    position: fixed;
+}
+
+/*menu à esquerda*/
+.menu_esquerda{
+    position: fixed;
+    top: 70px;
+    background: #166f6f;
+    width: 100%;
+    display: flex;
+    margin: 0px;
+    border-radius: 0px 0px 90px 0px;
+    align-items: center;
+}
+
+/*botões do menu*/
+.op{
+    font-size: 20px;
+    border: 3px;
+    border-radius: 10px;
+    margin-left: 5px;
+    color: #fff;
+    font-weight: 600;
+    margin-top: 15px;
+
+    line-height: 0.9;
+
+    text-transform: uppercase;
+
+    width: 100px;
+    height: 40px;
+    background-color: #18516b;
+}
+
+.footer{
+    position: fixed;
+    bottom: 0px;
+    color: #fff;
+    background-color: #266683;
+    width: 100%;
+    height: 5%;
+}
