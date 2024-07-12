@@ -1,220 +1,173 @@
-import React, { useState } from "react";
-import { DesktopOutlined, FileOutlined, PieChartOutlined, TeamOutlined, UserOutlined, UserAddOutlined, } from "@ant-design/icons";
-import { Breadcrumb, Button, Layout, Menu, theme } from "antd";
-import { getIsAuthenticated } from "../api/api";
-import { Checkbox, Form, Input } from 'antd'
+import React, { useEffect, useState } from "react";
+import {
+  Layout,
+  Menu,
+  Breadcrumb,
+  List,
+  Spin,
+  Alert,
+  Button,
+  Form,
+  Input,
+} from "antd";
+import {
+  UserOutlined,
+  LaptopOutlined,
+  NotificationOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+
+import { getRequest } from "../api/api";
 
 const { Header, Content, Footer, Sider } = Layout;
+const { SubMenu } = Menu;
 
-const onFinish = (values) => {
-  console.log('Success:', values);
-};
-const onFinishFailed = (errorInfo) => {
-  console.log('Failed:', errorInfo);
-};
+const HomePage = () => {
+  const [pacientes, setPacientes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showList, setShowList] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [size] = useState("large");
 
-function getItem(label, key, icon, children) {
-  return { key, icon, children, label, };
-}
+  useEffect(() => {
+    const fetchPacientes = async () => {
+      try {
+        const data = await getRequest("http://localhost:8080", "/pacientes");
+        setPacientes(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+        setLoading(false);
+      }
+    };
 
-const items = [getItem("Option 1", "1", <PieChartOutlined />),
-getItem("Option 2", "2", <DesktopOutlined />), getItem("User", "sub1", <UserOutlined />, [getItem("Tom", "3"), getItem("Bill", "4"), getItem("Alex", "5"),]),
-getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8"), getItem("Team 3", "10"),]),
-getItem("Cadastro", "sub3", <UserAddOutlined />, [getItem("Secretaria", "12"), getItem("Medico", "14"),]),
-getItem("Files", "9", <FileOutlined />),
-];
+    if (showList) {
+      fetchPacientes();
+    }
+  }, [showList]);
 
-const handleLoginVerification = async (e) => {
-  e.preventDefault();
-  try {
-    const isAuthenticated = await getIsAuthenticated()
-    console.log(isAuthenticated)
-  } catch (error) {
-    console.error("Erro ao tentar autenticar o token:", error);
-  }
-};
+  const handleListClick = () => {
+    setShowList(true);
+    setShowForm(false);
+  };
 
-const Home = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const [selectedMenuItem, setSelectedMenuItem] = useState(null);
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
-  const handleMenuItemClick = ({ key }) => {
-    setSelectedMenuItem(key);
+  const handleFormClick = () => {
+    setShowList(false);
+    setShowForm(true);
   };
 
   return (
-    <Layout
-      style={{
-        minHeight: "100vh",
-      }}
-    >
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
-      >
-        <div className="demo-logo-vertical" />
-        <Menu
-          theme="dark"
-          defaultSelectedKeys={["1"]}
-          mode="inline"
-          items={items}
-          onSelect={handleMenuItemClick}
-        />
-      </Sider>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Header className="header">
+        <div className="logo" />  
+        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={["1"]}>
+          <Menu.Item key="1">Home</Menu.Item>
+          <Menu.Item key="2">Sobre</Menu.Item>
+          <Menu.Item key="3">Contato</Menu.Item>
+        </Menu>
+      </Header>
       <Layout>
-        <Header
-          style={{
-            padding: 0,
-            background: colorBgContainer,
-          }}
-        />
-        <Content
-          style={{
-            margin: "0 16px",
-          }}
-        >
-          <Breadcrumb
-            style={{
-              margin: "16px 0",
-            }}
+        <Sider width={200} className="site-layout-background">
+          <Menu
+            mode="inline"
+            defaultSelectedKeys={["1"]}
+            defaultOpenKeys={["sub1"]}
+            style={{ height: "100%", borderRight: 0 }}
           >
-            <Breadcrumb.Item>User</Breadcrumb.Item>
-            <Breadcrumb.Item>{selectedMenuItem}</Breadcrumb.Item>
-          </Breadcrumb>
-          <div
-            style={{
-              
-              padding: 24,
-              minHeight: 360,
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-            }}
-          >
-            {selectedMenuItem === "12" && <Form
-              name="basic"
-              labelCol={{
-                span: 8,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              style={{
-                maxWidth: 600,
-                
-              }}
-              initialValues={{
-                remember: true,
-              }}
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-              autoComplete="off"
+            <SubMenu key="sub1" icon={<UserOutlined />} title="Pacientes">
+              <Menu.Item key="1" onClick={handleListClick}>
+                Listar
+              </Menu.Item>
+              <Menu.Item key="2" onClick={handleFormClick}>
+                Cadastrar
+              </Menu.Item>
+            </SubMenu>
+            <SubMenu key="sub2" icon={<LaptopOutlined />} title="Sistema">
+              <Menu.Item key="5">Opção 1</Menu.Item>
+              <Menu.Item key="6">Opção 2</Menu.Item>
+            </SubMenu>
+            <SubMenu
+              key="sub3"
+              icon={<NotificationOutlined />}
+              title="Notificações"
             >
-              <Form.Item
-                label="Nome"
-                name="nome"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Digite seu nome!',
-                  },
-                ]}
-              >
-               <Input />
-              </Form.Item>
-
-              <Form.Item
-                label="CPF"
-                name="cpf"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Digite seu cpf!',
-                  },
-                  {
-                    pattern: /^[0-9]*$/,
-                    message: 'Por favor, insira apenas números.',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                label="Contato"
-                name="contato"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Digite seu número de contato!',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Digite seu email!',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-
-              <Form.Item
-                label="Senha"
-                name="password"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Digite sua senha!',
-                  },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-
-              <Form.Item
-                name="remember"
-                valuePropName="checked"
-                wrapperCol={{
-                  offset: 8,
-                  span: 16,
-                }}
-              >
-                
-              </Form.Item>
-
-              <Form.Item
-                wrapperCol={{
-                  offset: 8,
-                  span: 16,
-                }}
-              >
+              <Menu.Item key="9">Alerta 1</Menu.Item>
+              <Menu.Item key="10">Alerta 2</Menu.Item>
+            </SubMenu>
+          </Menu>
+        </Sider>
+        <Layout style={{ padding: "0 24px 24px" }}>
+          <Breadcrumb style={{ margin: "16px 0" }}>
+            <Breadcrumb.Item>Home</Breadcrumb.Item>
+            <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
+          </Breadcrumb>
+          <Content
+            className="site-layout-background"
+            style={{
+              padding: 24,
+              margin: 0,
+              minHeight: 280,
+            }}
+          >
+            {showList && (
+              loading ? (
+                <Spin tip="Carregando..." />
+              ) : error ? (
+                <Alert message="Erro ao carregar os dados" type="error" />
+              ) : (
+                <List
+                  itemLayout="horizontal"
+                  dataSource={pacientes}
+                  renderItem={(item) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        title={item.nome}
+                        description={`Idade: ${item.idade} | Gênero: ${item.sexo}`}
+                      />
+                      <div>
+                        <Button
+                          type="primary"
+                          icon={<EditOutlined />}
+                          size={size}
+                          style={{ marginRight: '10px' }}
+                        />
+                        <Button
+                          type="danger"
+                          icon={<DeleteOutlined />}
+                          size={size}
+                        />
+                      </div>
+                    </List.Item>
+                  )}
+                />
+              )
+            )}
+            {showForm && (
+              <Form layout="vertical">
+                <Form.Item label="Nome">
+                  <Input placeholder="Nome do paciente" />
+                </Form.Item>
+                <Form.Item label="Idade">
+                  <Input type="number" placeholder="Idade do paciente" />
+                </Form.Item>
+                <Form.Item label="Gênero">
+                  <Input placeholder="Gênero do paciente" />
+                </Form.Item>
                 <Button type="primary" htmlType="submit">
                   Cadastrar
                 </Button>
-              </Form.Item>
-            </Form>} {/* Exibir a mensagem quando o item "Secretaria" for selecionado */}
-          </div>
-        </Content>
-        <Footer
-          style={{
-            textAlign: "center",
-          }}
-        >
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
-        </Footer>
+              </Form>
+            )}
+          </Content>
+        </Layout>
       </Layout>
+      <Footer style={{ textAlign: "center" }}>
+        VitaLabs ©2023 Criado por Alguns alunos
+      </Footer>
     </Layout>
   );
 };
-export default Home;
+
+export default HomePage;

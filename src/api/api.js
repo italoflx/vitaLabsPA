@@ -25,7 +25,7 @@ export const getAuthToken = async (username, password) => {
 export const getRequest = async (url, endpoint, params = {}) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axiosInstance.get(`${url} ${endpoint}`, {
+        const response = await axiosInstance.get(`${url}${endpoint}`, {
             params,
             headers: {
                 Authorization: `Bearer ${token}`,

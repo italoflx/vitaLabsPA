@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { notification } from 'antd';
 import VitaLabBranco from "../assets/bannerbranco.png";
 import "../styles/login.css";
@@ -11,10 +11,26 @@ const Login = () => {
   const [api, contextHolder] = notification.useNotification();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const redirected = localStorage.getItem('redirected');
+    if (redirected) {
+      notificationWrong('top');
+      localStorage.removeItem('redirected'); 
+    }
+  }, []);
+
   const openNotification = (placement) => {
     api.info({
       message: `Erro de login`,
       description: 'Nome de usuário ou senha incorretos.',
+      placement,
+    });
+  };
+
+  const notificationWrong = (placement) => {
+    api.info({
+      message: `Acesso Negado`,
+      description: 'Faça o login para acessar',
       placement,
     });
   };
