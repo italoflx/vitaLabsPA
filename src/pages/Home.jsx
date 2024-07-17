@@ -1,24 +1,14 @@
 import React, { useEffect, useState } from "react";
-import {
-  Layout,
-  Menu,
-  Breadcrumb,
-  List,
-  Spin,
-  Alert,
-  Button,
-  Form,
-  Input,
-} from "antd";
+import { Layout, Menu, Breadcrumb, List, Spin, Alert } from "antd";
 import {
   UserOutlined,
   LaptopOutlined,
   NotificationOutlined,
-  EditOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons";
+import PacientePost from "../components/PacientePost";
 
-import { getRequest } from "../api/api";
+import { getRequest, postRequest, deleteRequest } from "../api/api";
+import PacienteCard from "../components/PacienteCard";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -29,8 +19,17 @@ const HomePage = () => {
   const [error, setError] = useState(null);
   const [showList, setShowList] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [size] = useState("large");
 
+  const [paciente, setPaciente] = useState({
+    nome: "",
+    dataNascimento: null,
+    sexo: "",
+    cpf: "",
+    altura: "",
+    peso: "",
+    contato: "",
+    email: "",
+  });
   useEffect(() => {
     const fetchPacientes = async () => {
       try {
@@ -58,10 +57,45 @@ const HomePage = () => {
     setShowForm(true);
   };
 
+  const handleSubmit = async () => {
+    //e.preventDefault();
+    const pacienteData = {
+      nome: paciente.nome,
+      dataNascimento: paciente.dataNascimento
+        ? paciente.dataNascimento.format("YYYY-MM-DD")
+        : null,
+      sexo: paciente.sexo,
+      cpf: paciente.cpf,
+      altura: parseFloat(paciente.altura),
+      peso: parseFloat(paciente.peso),
+      contato: paciente.contato,
+      email: paciente.email,
+    };
+    try {
+      await postRequest("http://localhost:8080", "/pacientes", pacienteData);
+      alert("Paciente cadastrado com sucesso!");
+      setShowForm(false);
+      setShowList(true);
+    } catch (error) {
+      console.error("Erro ao cadastrar paciente:", error);
+      alert("Erro ao cadastrar paciente");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteRequest("http://localhost:8080", `/pacientes/${id}`);
+      console.log("paciente deletado")
+      setPacientes(pacientes.filter((paciente) => paciente.id !== id));
+    } catch (err) {
+      console.log("erro ao deletar paciente")
+    }
+  };
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Header className="header">
-        <div className="logo" />  
+        <div className="logo" />
         <Menu theme="dark" mode="horizontal" defaultSelectedKeys={["1"]}>
           <Menu.Item key="1">Home</Menu.Item>
           <Menu.Item key="2">Sobre</Menu.Item>
@@ -111,60 +145,34 @@ const HomePage = () => {
               minHeight: 280,
             }}
           >
-            {showList && (
-              loading ? (
+            {showList &&
+              (loading ? (
                 <Spin tip="Carregando..." />
               ) : error ? (
                 <Alert message="Erro ao carregar os dados" type="error" />
               ) : (
                 <List
-                  itemLayout="horizontal"
+                  itemLayout="vertical"
                   dataSource={pacientes}
                   renderItem={(item) => (
                     <List.Item>
-                      <List.Item.Meta
-                        title={item.nome}
-                        description={`Idade: ${item.idade} | Gênero: ${item.sexo}`}
-                      />
-                      <div>
-                        <Button
-                          type="primary"
-                          icon={<EditOutlined />}
-                          size={size}
-                          style={{ marginRight: '10px' }}
-                        />
-                        <Button
-                          type="danger"
-                          icon={<DeleteOutlined />}
-                          size={size}
-                        />
-                      </div>
+                      <PacienteCard key={item.id} paciente={item} />
                     </List.Item>
                   )}
                 />
-              )
-            )}
+              ))}
             {showForm && (
-              <Form layout="vertical">
-                <Form.Item label="Nome">
-                  <Input placeholder="Nome do paciente" />
-                </Form.Item>
-                <Form.Item label="Idade">
-                  <Input type="number" placeholder="Idade do paciente" />
-                </Form.Item>
-                <Form.Item label="Gênero">
-                  <Input placeholder="Gênero do paciente" />
-                </Form.Item>
-                <Button type="primary" htmlType="submit">
-                  Cadastrar
-                </Button>
-              </Form>
+              <PacientePost
+                paciente={paciente}
+                handleSubmit={handleSubmit}
+                handleDelete={handleDelete}
+              />
             )}
           </Content>
         </Layout>
       </Layout>
       <Footer style={{ textAlign: "center" }}>
-        VitaLabs ©2023 Criado por Alguns alunos
+        VitaLabs ©2024 Criado por Alguns alunos lascados que não dormem
       </Footer>
     </Layout>
   );

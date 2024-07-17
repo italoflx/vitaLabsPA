@@ -41,7 +41,7 @@ export const getRequest = async (url, endpoint, params = {}) => {
 export const postRequest = async (url, endpoint, data = {}) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axiosInstance.post(`${url} ${endpoint}`, data, {
+        const response = await axiosInstance.post(`${url}${endpoint}`,data, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -56,7 +56,7 @@ export const postRequest = async (url, endpoint, data = {}) => {
 export const putRequest = async (url, endpoint, data = {}) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axiosInstance.put(`${url} ${endpoint}`, data, {
+        const response = await axiosInstance.put(`${url}${endpoint}`, data, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -71,7 +71,7 @@ export const putRequest = async (url, endpoint, data = {}) => {
 export const deleteRequest = async (url, endpoint) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axiosInstance.delete(`${url} ${endpoint}`, {
+        const response = await axiosInstance.delete(`${url}${endpoint}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
