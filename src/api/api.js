@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = 'http://localhost:8080';
+const baseURL = 'http://localhost:8080/';
 
 const axiosInstance = axios.create({
     baseURL,
@@ -12,7 +12,7 @@ const axiosInstance = axios.create({
 
 export const getAuthToken = async (username, password) => {
     try {
-        const response = await axios.post(`${baseURL}/login`, { username, password });
+        const response = await axios.post(`${baseURL}login`, { username, password });
         const token = response.data;
         localStorage.setItem('token', token);
         return true;
@@ -22,11 +22,10 @@ export const getAuthToken = async (username, password) => {
     }
 };
 
-export const getRequest = async (url, endpoint, params = {}) => {
+export const getRequest = async (endpoint) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axiosInstance.get(`${url}${endpoint}`, {
-            params,
+        const response = await axiosInstance.get(`${baseURL}${endpoint}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -38,10 +37,10 @@ export const getRequest = async (url, endpoint, params = {}) => {
     }
 };
 
-export const postRequest = async (url, endpoint, data = {}) => {
+export const postRequest = async (endpoint, data = {}) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axiosInstance.post(`${url}${endpoint}`,data, {
+        const response = await axiosInstance.post(`${baseURL}${endpoint}`,data, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -53,10 +52,10 @@ export const postRequest = async (url, endpoint, data = {}) => {
     }
 };
 
-export const putRequest = async (url, endpoint, data = {}) => {
+export const putRequest = async (endpoint, data = {}) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axiosInstance.put(`${url}${endpoint}`, data, {
+        const response = await axiosInstance.put(`${baseURL}${endpoint}`, data, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -68,14 +67,16 @@ export const putRequest = async (url, endpoint, data = {}) => {
     }
 };
 
-export const deleteRequest = async (url, endpoint) => {
+export const deleteRequest = async (endpoint, id) => {
+    console.log(id + "~" + endpoint)
     try {
         const token = localStorage.getItem('token');
-        const response = await axiosInstance.delete(`${url}${endpoint}`, {
+        const response = await axiosInstance.delete(`${baseURL}${endpoint}/${id}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
+        window.location.reload()
         return response.data;
     } catch (error) {
         console.error('Erro na solicitação DELETE:', error);
@@ -90,7 +91,7 @@ export const logout = () => {
 export const getIsAuthenticated = async () => {
     try {
         const token = localStorage.getItem('token')
-        const response = await axios.post(`${baseURL}/login/verificarToken`, { token });
+        const response = await axios.post(`${baseURL}login/verificarToken`, { token });
         return response.data
     } catch (error) {
         console.error('O token nao e valido negao ou o metodo n presta', error)

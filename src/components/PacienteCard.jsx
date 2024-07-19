@@ -2,8 +2,9 @@ import React from "react";
 import { Card, Avatar, Button } from "antd";
 import { CiUser } from "react-icons/ci";
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { deleteRequest } from "../api/api";
 
-const PacienteCard = ({ paciente, handleEdit, handleDelete }) => {
+const PacienteCard = ({ paciente, handleEdit }) => {
   return (
     <Card
       style={{
@@ -32,8 +33,8 @@ const PacienteCard = ({ paciente, handleEdit, handleDelete }) => {
         icon={<DeleteOutlined />} 
         size={"large"} 
         style={{ marginRight: "10px" }}
-        onClick={() => handleDelete(paciente.id)}
-      /> 
+        onClick={() => deleteRequest("pacientes", paciente.id)}
+      />
     </Card>
   );
 };

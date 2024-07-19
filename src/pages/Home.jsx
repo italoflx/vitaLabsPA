@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, Breadcrumb, List, Spin, Alert } from "antd";
+import { Layout, Menu, Breadcrumb, Spin, Alert } from "antd";
 import {
   UserOutlined,
   LaptopOutlined,
   NotificationOutlined,
 } from "@ant-design/icons";
-import PacientePost from "../components/PacientePost";
 
-import { getRequest, postRequest, deleteRequest } from "../api/api";
+import { getRequest } from "../api/api";
 import PacienteCard from "../components/PacienteCard";
+import PacienteForm from "../components/PacienteForm";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -17,79 +17,36 @@ const HomePage = () => {
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showList, setShowList] = useState(false);
+  const [showList, setShowList] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
-  const [paciente, setPaciente] = useState({
-    nome: "",
-    dataNascimento: null,
-    sexo: "",
-    cpf: "",
-    altura: "",
-    peso: "",
-    contato: "",
-    email: "",
-  });
-  useEffect(() => {
-    const fetchPacientes = async () => {
-      try {
-        const data = await getRequest("http://localhost:8080", "/pacientes");
-        setPacientes(data);
-        setLoading(false);
-      } catch (err) {
-        setError(err);
-        setLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      const data = await getRequest("pacientes");
+      setPacientes(data);
+      setLoading(false);
+    } catch (error) {
+      setError(error);
+      setLoading(false);
+      console.error("Erro ao listar pacientes: ", error);
+    }
+  };
 
+  useEffect(() => {
     if (showList) {
-      fetchPacientes();
+      fetchData();
     }
   }, [showList]);
 
   const handleListClick = () => {
     setShowList(true);
     setShowForm(false);
+    fetchData()
   };
 
   const handleFormClick = () => {
     setShowList(false);
     setShowForm(true);
-  };
-
-  const handleSubmit = async () => {
-    //e.preventDefault();
-    const pacienteData = {
-      nome: paciente.nome,
-      dataNascimento: paciente.dataNascimento
-        ? paciente.dataNascimento.format("YYYY-MM-DD")
-        : null,
-      sexo: paciente.sexo,
-      cpf: paciente.cpf,
-      altura: parseFloat(paciente.altura),
-      peso: parseFloat(paciente.peso),
-      contato: paciente.contato,
-      email: paciente.email,
-    };
-    try {
-      await postRequest("http://localhost:8080", "/pacientes", pacienteData);
-      alert("Paciente cadastrado com sucesso!");
-      setShowForm(false);
-      setShowList(true);
-    } catch (error) {
-      console.error("Erro ao cadastrar paciente:", error);
-      alert("Erro ao cadastrar paciente");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteRequest("http://localhost:8080", `/pacientes/${id}`);
-      console.log("paciente deletado")
-      setPacientes(pacientes.filter((paciente) => paciente.id !== id));
-    } catch (err) {
-      console.log("erro ao deletar paciente")
-    }
   };
 
   return (
@@ -151,22 +108,14 @@ const HomePage = () => {
               ) : error ? (
                 <Alert message="Erro ao carregar os dados" type="error" />
               ) : (
-                <List
-                  itemLayout="vertical"
-                  dataSource={pacientes}
-                  renderItem={(item) => (
-                    <List.Item>
-                      <PacienteCard key={item.id} paciente={item} />
-                    </List.Item>
-                  )}
-                />
+                <div>
+                  {pacientes.map((paciente) => (
+                    <PacienteCard key={paciente.id} paciente={paciente} />
+                  ))}
+                </div>
               ))}
             {showForm && (
-              <PacientePost
-                paciente={paciente}
-                handleSubmit={handleSubmit}
-                handleDelete={handleDelete}
-              />
+              <PacienteForm/>
             )}
           </Content>
         </Layout>
