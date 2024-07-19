@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Card, Avatar, Button, Modal, message } from "antd";
-import { CiUser } from "react-icons/ci";
+import { LuUser } from "react-icons/lu";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { deleteRequest } from "../api/api";
 import PacienteFormEdit from "./PacienteFormEdit";
 
-const PacienteCard = ({ paciente, onEdit }) => {
+const PacienteCard = ({ paciente }) => {
   const [showEditForm, setShowEditForm] = useState(false);
 
   const handleDelete = async () => {
@@ -21,7 +21,8 @@ const PacienteCard = ({ paciente, onEdit }) => {
     <>
       <Card style={{ minWidth: 300 }}>
         <Card.Meta
-          avatar={<Avatar src={<CiUser />} />}
+          avatar={<Avatar icon={<LuUser />
+          } />}
           title={paciente.nome}
           description={
             <>

@@ -9,7 +9,7 @@ const PacienteFormEdit = ({ paciente, onClose }) => {
   useEffect(() => {
     if (paciente) {
       form.setFieldsValue({
-        id: paciente.id, // Adiciona o ID ao estado do formulário
+        id: paciente.id,
         nome: paciente.nome,
         cpf: paciente.cpf,
         sexo: paciente.sexo,
@@ -24,10 +24,8 @@ const PacienteFormEdit = ({ paciente, onClose }) => {
 
   const handleSubmit = async (values) => {
     try {
-      // Remove o campo id do objeto de dados antes de enviá-lo
       const { id, ...data } = values;
-      const response = await putRequest(`pacientes/${id}`, data);
-      console.log(response);
+      await putRequest(`pacientes/${id}`, data);
       message.success('Paciente atualizado com sucesso!');
       form.resetFields();
       if (onClose) onClose();

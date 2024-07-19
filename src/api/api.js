@@ -61,6 +61,7 @@ export const putRequest = async (endpoint, data) => {
                 Authorization: `Bearer ${token}`,
             },
         });
+        window.location.reload()
         return response.data;
     } catch (error) {
         console.error('Erro na solicitação PUT:', error);
