@@ -9,6 +9,7 @@ import {
 import { getRequest } from "../api/api";
 import PacienteCard from "../components/PacienteCard";
 import PacienteForm from "../components/PacienteForm";
+import PacienteFormEdit from "../components/PacienteFormEdit";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -18,7 +19,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showList, setShowList] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [editingPaciente, setEditingPaciente] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -40,13 +41,23 @@ const HomePage = () => {
 
   const handleListClick = () => {
     setShowList(true);
-    setShowForm(false);
-    fetchData()
+    setEditingPaciente(null);  // Reset to ensure no patient is being edited
+    fetchData();
   };
 
   const handleFormClick = () => {
     setShowList(false);
-    setShowForm(true);
+    setEditingPaciente(null);  // Ensure no patient is being edited
+  };
+
+  const handleEdit = (paciente) => {
+    setEditingPaciente(paciente);
+    setShowList(false);  // Hide the patient list when editing
+  };
+
+  const handleEditClose = () => {
+    setEditingPaciente(null);
+    setShowList(true);  // Show the patient list again
   };
 
   return (
@@ -102,20 +113,29 @@ const HomePage = () => {
               minHeight: 280,
             }}
           >
-            {showList &&
-              (loading ? (
+            {showList && !editingPaciente ? (
+              loading ? (
                 <Spin tip="Carregando..." />
               ) : error ? (
                 <Alert message="Erro ao carregar os dados" type="error" />
               ) : (
                 <div>
                   {pacientes.map((paciente) => (
-                    <PacienteCard key={paciente.id} paciente={paciente} />
+                    <PacienteCard
+                      key={paciente.id}
+                      paciente={paciente}
+                      onEdit={handleEdit}
+                    />
                   ))}
                 </div>
-              ))}
-            {showForm && (
-              <PacienteForm/>
+              )
+            ) : editingPaciente ? (
+              <PacienteFormEdit
+                paciente={editingPaciente}
+                onClose={handleEditClose}
+              />
+            ) : (
+              <PacienteForm />
             )}
           </Content>
         </Layout>

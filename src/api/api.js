@@ -52,8 +52,9 @@ export const postRequest = async (endpoint, data = {}) => {
     }
 };
 
-export const putRequest = async (endpoint, data = {}) => {
+export const putRequest = async (endpoint, data) => {
     try {
+        console.log(data)
         const token = localStorage.getItem('token');
         const response = await axiosInstance.put(`${baseURL}${endpoint}`, data, {
             headers: {
@@ -68,7 +69,6 @@ export const putRequest = async (endpoint, data = {}) => {
 };
 
 export const deleteRequest = async (endpoint, id) => {
-    console.log(id + "~" + endpoint)
     try {
         const token = localStorage.getItem('token');
         const response = await axiosInstance.delete(`${baseURL}${endpoint}/${id}`, {
