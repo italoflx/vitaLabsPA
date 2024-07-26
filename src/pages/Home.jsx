@@ -11,53 +11,63 @@ import PacienteCard from "../components/PacienteCard";
 import PacienteForm from "../components/PacienteForm";
 import PacienteFormEdit from "../components/PacienteFormEdit";
 
+import MedicoCard from "../components/MedicoCard";
+import MedicoForm from "../components/MedicoForm";
+import MedicoFormEdit from "../components/MedicoFormEdit";
+
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 
 const HomePage = () => {
   const [pacientes, setPacientes] = useState([]);
+  const [medicos, setMedicos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showList, setShowList] = useState(true);
+  const [view, setView] = useState("pacientes");
   const [editingPaciente, setEditingPaciente] = useState(null);
+  const [editingMedico, setEditingMedico] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = async (type) => {
     try {
-      const data = await getRequest("pacientes");
-      setPacientes(data);
+      setLoading(true);
+      const data = await getRequest(type);
+      type === "pacientes" ? setPacientes(data) : setMedicos(data);
       setLoading(false);
     } catch (error) {
       setError(error);
       setLoading(false);
-      console.error("Erro ao listar pacientes: ", error);
+      console.error(`Erro ao listar ${type}: `, error);
     }
   };
 
   useEffect(() => {
-    if (showList) {
-      fetchData();
+    if (view === "pacientes") {
+      fetchData("pacientes");
+    } else if (view === "medicos") {
+      fetchData("medicos");
     }
-  }, [showList]);
+  }, [view]);
 
-  const handleListClick = () => {
-    setShowList(true);
-    setEditingPaciente(null);  // Reset to ensure no patient is being edited
-    fetchData();
+  const handleViewChange = (newView) => {
+    setView(newView);
+    setEditingPaciente(null);
+    setEditingMedico(null);
   };
 
-  const handleFormClick = () => {
-    setShowList(false);
-    setEditingPaciente(null);  // Ensure no patient is being edited
-  };
-
-  const handleEdit = (paciente) => {
+  const handleEditPaciente = (paciente) => {
     setEditingPaciente(paciente);
-    setShowList(false);  // Hide the patient list when editing
+    setView("editPaciente");
+  };
+
+  const handleEditMedico = (medico) => {
+    setEditingMedico(medico);
+    setView("editMedico");
   };
 
   const handleEditClose = () => {
     setEditingPaciente(null);
-    setShowList(true);  // Show the patient list again
+    setEditingMedico(null);
+    setView("pacientes");
   };
 
   return (
@@ -79,19 +89,27 @@ const HomePage = () => {
             style={{ height: "100%", borderRight: 0 }}
           >
             <SubMenu key="sub1" icon={<UserOutlined />} title="Pacientes">
-              <Menu.Item key="1" onClick={handleListClick}>
+              <Menu.Item key="1" onClick={() => handleViewChange("pacientes")}>
                 Listar
               </Menu.Item>
-              <Menu.Item key="2" onClick={handleFormClick}>
+              <Menu.Item key="2" onClick={() => handleViewChange("formPaciente")}>
                 Cadastrar
               </Menu.Item>
             </SubMenu>
-            <SubMenu key="sub2" icon={<LaptopOutlined />} title="Sistema">
+            <SubMenu key="sub2" icon={<UserOutlined />} title="Medicos">
+              <Menu.Item key="3" onClick={() => handleViewChange("medicos")}>
+                Listar
+              </Menu.Item>
+              <Menu.Item key="4" onClick={() => handleViewChange("formMedico")}>
+                Cadastrar
+              </Menu.Item>
+            </SubMenu>
+            <SubMenu key="sub3" icon={<LaptopOutlined />} title="Sistema">
               <Menu.Item key="5">Opção 1</Menu.Item>
               <Menu.Item key="6">Opção 2</Menu.Item>
             </SubMenu>
             <SubMenu
-              key="sub3"
+              key="sub4"
               icon={<NotificationOutlined />}
               title="Notificações"
             >
@@ -113,7 +131,7 @@ const HomePage = () => {
               minHeight: 280,
             }}
           >
-            {showList && !editingPaciente ? (
+            {view === "pacientes" ? (
               loading ? (
                 <Spin tip="Carregando..." />
               ) : error ? (
@@ -124,19 +142,42 @@ const HomePage = () => {
                     <PacienteCard
                       key={paciente.id}
                       paciente={paciente}
-                      onEdit={handleEdit}
+                      onEdit={handleEditPaciente}
                     />
                   ))}
                 </div>
               )
-            ) : editingPaciente ? (
+            ) : view === "formPaciente" ? (
+              <PacienteForm />
+            ) : view === "editPaciente" ? (
               <PacienteFormEdit
                 paciente={editingPaciente}
                 onClose={handleEditClose}
               />
-            ) : (
-              <PacienteForm />
-            )}
+            ) : view === "medicos" ? (
+              loading ? (
+                <Spin tip="Carregando..." />
+              ) : error ? (
+                <Alert message="Erro ao carregar os dados" type="error" />
+              ) : (
+                <div>
+                  {medicos.map((medico) => (
+                    <MedicoCard
+                      key={medico.id}
+                      medico={medico}
+                      onEdit={handleEditMedico}
+                    />
+                  ))}
+                </div>
+              )
+            ) : view === "formMedico" ? (
+              <MedicoForm />
+            ) : view === "editMedico" ? (
+              <MedicoFormEdit
+                medico={editingMedico}
+                onClose={handleEditClose}
+              />
+            ) : null}
           </Content>
         </Layout>
       </Layout>
