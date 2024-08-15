@@ -1,13 +1,35 @@
-import React, { useState } from "react";
-import { Form, Input, Button, DatePicker, message, TimePicker } from "antd";
-import { postRequest } from "../api/api"; 
+import React, { useState, useEffect } from "react";
+import { Form, Button, DatePicker, TimePicker, message } from "antd";
+import { getRequest, postRequest } from "../api/api";
 import moment from "moment";
 
 const ConsultaForm = () => {
   const [form] = Form.useForm();
+  const [medicos, setMedicos] = useState([]);
+  const [pacientes, setPacientes] = useState([]);
+  const [horariosOcupados, setHorariosOcupados] = useState([]);
+  const [selectedMedico, setSelectedMedico] = useState(null);
+  const [selectedPaciente, setSelectedPaciente] = useState(null);
+  const [dataConsulta, setDataConsulta] = useState(null);
+  const [horaConsulta, setHoraConsulta] = useState(null);
 
-  const handleSubmit = async (values) => {
-    const { medicoId, pacienteId, dataConsulta, horaConsulta } = values;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const medicosData = await getRequest("medicos");
+        setMedicos(medicosData);
+        const pacientesData = await getRequest("pacientes");
+        setPacientes(pacientesData);
+        const horariosData = await getRequest("consultas/ocupadas");
+        setHorariosOcupados(horariosData);
+      } catch (error) {
+        message.error("Erro ao carregar dados.");
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSubmit = async () => {
     const dataHoraConsulta = moment(dataConsulta)
       .set({
         hour: horaConsulta.hour(),
@@ -16,53 +38,47 @@ const ConsultaForm = () => {
       .toISOString();
 
     const consultaData = {
-      medico_id: medicoId,
-      paciente_id: pacienteId,
+      medico_id: selectedMedico,
+      paciente_id: selectedPaciente,
       dataHoraConsulta: dataHoraConsulta,
     };
 
-    console.log("Dados da consulta:", consultaData);
-
     try {
-      const data = await postRequest("consultas", consultaData);
-      console.log(data);
-      message.success("Consulta cadastrada com sucesso!");
+      await postRequest("consultas", consultaData);
+      message.success("Consulta agendada com sucesso!");
       form.resetFields();
     } catch (error) {
-      console.error(error);
-      message.error("Erro ao cadastrar consulta. Tente novamente.");
+      message.error("Erro ao agendar consulta.");
     }
   };
 
   return (
     <Form layout="vertical" form={form} onFinish={handleSubmit}>
-      <Form.Item
-        label="ID do Médico"
-        name="medicoId"
-        rules={[{ required: true, message: "Por favor, insira o ID do médico!" }]}
-      >
-        <Input />
+      <Form.Item label="Selecionar Médico">
+        <select onChange={(e) => setSelectedMedico(e.target.value)} required>
+          <option value="">Selecione um médico</option>
+          {medicos.map((medico) => (
+            <option key={medico.id} value={medico.id}>
+              {medico.nome}
+            </option>
+          ))}
+        </select>
       </Form.Item>
-      <Form.Item
-        label="ID do Paciente"
-        name="pacienteId"
-        rules={[{ required: true, message: "Por favor, insira o ID do paciente!" }]}
-      >
-        <Input />
+      <Form.Item label="Selecionar Paciente">
+        <select onChange={(e) => setSelectedPaciente(e.target.value)} required>
+          <option value="">Selecione um paciente</option>
+          {pacientes.map((paciente) => (
+            <option key={paciente.id} value={paciente.id}>
+              {paciente.nome}
+            </option>
+          ))}
+        </select>
       </Form.Item>
-      <Form.Item
-        label="Data da Consulta"
-        name="dataConsulta"
-        rules={[{ required: true, message: "Por favor, selecione a data da consulta!" }]}
-      >
-        <DatePicker />
+      <Form.Item label="Data da Consulta">
+        <DatePicker onChange={(date) => setDataConsulta(date)} />
       </Form.Item>
-      <Form.Item
-        label="Hora da Consulta"
-        name="horaConsulta"
-        rules={[{ required: true, message: "Por favor, selecione a hora da consulta!" }]}
-      >
-        <TimePicker />
+      <Form.Item label="Hora da Consulta">
+        <TimePicker onChange={(time) => setHoraConsulta(time)} />
       </Form.Item>
       <Form.Item>
         <Button type="primary" htmlType="submit">
