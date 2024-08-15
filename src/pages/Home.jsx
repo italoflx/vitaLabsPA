@@ -10,10 +10,10 @@ import { getRequest } from "../api/api";
 import PacienteCard from "../components/PacienteCard";
 import PacienteForm from "../components/PacienteForm";
 import PacienteFormEdit from "../components/PacienteFormEdit";
-
 import MedicoCard from "../components/MedicoCard";
 import MedicoForm from "../components/MedicoForm";
 import MedicoFormEdit from "../components/MedicoFormEdit";
+import ConsultaForm from "../components/ConsultaForm";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -96,7 +96,7 @@ const HomePage = () => {
                 Cadastrar
               </Menu.Item>
             </SubMenu>
-            <SubMenu key="sub2" icon={<UserOutlined />} title="Medicos">
+            <SubMenu key="sub2" icon={<UserOutlined />} title="Médicos">
               <Menu.Item key="3" onClick={() => handleViewChange("medicos")}>
                 Listar
               </Menu.Item>
@@ -104,9 +104,10 @@ const HomePage = () => {
                 Cadastrar
               </Menu.Item>
             </SubMenu>
-            <SubMenu key="sub3" icon={<LaptopOutlined />} title="Sistema">
-              <Menu.Item key="5">Opção 1</Menu.Item>
-              <Menu.Item key="6">Opção 2</Menu.Item>
+            <SubMenu key="sub3" icon={<LaptopOutlined />} title="Consultas">
+              <Menu.Item key="5" onClick={() => handleViewChange("formConsulta")}>
+                Agendar Consulta
+              </Menu.Item>
             </SubMenu>
             <SubMenu
               key="sub4"
@@ -177,6 +178,8 @@ const HomePage = () => {
                 medico={editingMedico}
                 onClose={handleEditClose}
               />
+            ) : view === "formConsulta" ? (
+              <ConsultaForm/>
             ) : null}
           </Content>
         </Layout>
