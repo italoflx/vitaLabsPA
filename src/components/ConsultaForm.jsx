@@ -1,35 +1,46 @@
-import React, { useState, useEffect } from "react";
-import { Form, Button, DatePicker, TimePicker, message } from "antd";
-import { getRequest, postRequest } from "../api/api";
+import React, { useEffect, useState } from "react";
+import { Form, Button, DatePicker, message, TimePicker, Card, Spin } from "antd";
+import { postRequest, getRequest } from "../api/api"; 
 import moment from "moment";
 
 const ConsultaForm = () => {
   const [form] = Form.useForm();
+  const [medicoId, setMedicoId] = useState(null);
+  const [pacienteId, setPacienteId] = useState(null);
   const [medicos, setMedicos] = useState([]);
   const [pacientes, setPacientes] = useState([]);
-  const [horariosOcupados, setHorariosOcupados] = useState([]);
-  const [selectedMedico, setSelectedMedico] = useState(null);
-  const [selectedPaciente, setSelectedPaciente] = useState(null);
-  const [dataConsulta, setDataConsulta] = useState(null);
-  const [horaConsulta, setHoraConsulta] = useState(null);
+  const [loadingMedicos, setLoadingMedicos] = useState(true);
+  const [loadingPacientes, setLoadingPacientes] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMedicos = async () => {
       try {
-        const medicosData = await getRequest("medicos");
-        setMedicos(medicosData);
-        const pacientesData = await getRequest("pacientes");
-        setPacientes(pacientesData);
-        const horariosData = await getRequest("consultas/ocupadas");
-        setHorariosOcupados(horariosData);
+        const data = await getRequest("medicos");
+        setMedicos(data);
+        setLoadingMedicos(false);
       } catch (error) {
-        message.error("Erro ao carregar dados.");
+        message.error("Erro ao carregar médicos.");
+        setLoadingMedicos(false);
       }
     };
-    fetchData();
+
+    const fetchPacientes = async () => {
+      try {
+        const data = await getRequest("pacientes");
+        setPacientes(data);
+        setLoadingPacientes(false);
+      } catch (error) {
+        message.error("Erro ao carregar pacientes.");
+        setLoadingPacientes(false);
+      }
+    };
+
+    fetchMedicos();
+    fetchPacientes();
   }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (values) => {
+    const { dataConsulta, horaConsulta } = values;
     const dataHoraConsulta = moment(dataConsulta)
       .set({
         hour: horaConsulta.hour(),
@@ -38,50 +49,82 @@ const ConsultaForm = () => {
       .toISOString();
 
     const consultaData = {
-      medico_id: selectedMedico,
-      paciente_id: selectedPaciente,
+      medico_id: medicoId,
+      paciente_id: pacienteId,
       dataHoraConsulta: dataHoraConsulta,
     };
 
+    console.log("Dados da consulta:", consultaData);
+
     try {
-      await postRequest("consultas", consultaData);
-      message.success("Consulta agendada com sucesso!");
+      const data = await postRequest("consultas", consultaData);
+      console.log(data);
+      message.success("Consulta cadastrada com sucesso!");
       form.resetFields();
     } catch (error) {
-      message.error("Erro ao agendar consulta.");
+      console.error(error);
+      message.error("Erro ao cadastrar consulta. Tente novamente.");
     }
   };
 
   return (
     <Form layout="vertical" form={form} onFinish={handleSubmit}>
-      <Form.Item label="Selecionar Médico">
-        <select onChange={(e) => setSelectedMedico(e.target.value)} required>
-          <option value="">Selecione um médico</option>
-          {medicos.map((medico) => (
-            <option key={medico.id} value={medico.id}>
-              {medico.nome}
-            </option>
-          ))}
-        </select>
+      <Form.Item label="Selecione o Médico">
+        {loadingMedicos ? (
+          <Spin tip="Carregando médicos..." />
+        ) : (
+          medicos.map((medico) => (
+            <Card
+              key={medico.id}
+              onClick={() => setMedicoId(medico.id)}
+              title={medico.nome}
+              style={{
+                marginBottom: "16px",
+                cursor: "pointer",
+                border: medicoId === medico.id ? "2px solid #1890ff" : "",
+              }}
+            >
+              <p>Especialidade: {medico.especialidade}</p>
+            </Card>
+          ))
+        )}
       </Form.Item>
-      <Form.Item label="Selecionar Paciente">
-        <select onChange={(e) => setSelectedPaciente(e.target.value)} required>
-          <option value="">Selecione um paciente</option>
-          {pacientes.map((paciente) => (
-            <option key={paciente.id} value={paciente.id}>
-              {paciente.nome}
-            </option>
-          ))}
-        </select>
+      <Form.Item label="Selecione o Paciente">
+        {loadingPacientes ? (
+          <Spin tip="Carregando pacientes..." />
+        ) : (
+          pacientes.map((paciente) => (
+            <Card
+              key={paciente.id}
+              onClick={() => setPacienteId(paciente.id)}
+              title={paciente.nome}
+              style={{
+                marginBottom: "16px",
+                cursor: "pointer",
+                border: pacienteId === paciente.id ? "2px solid #1890ff" : "",
+              }}
+            >
+              <p>Idade: {paciente.dataNascimento}</p>
+            </Card>
+          ))
+        )}
       </Form.Item>
-      <Form.Item label="Data da Consulta">
-        <DatePicker onChange={(date) => setDataConsulta(date)} />
+      <Form.Item
+        label="Data da Consulta"
+        name="dataConsulta"
+        rules={[{ required: true, message: "Por favor, selecione a data da consulta!" }]}
+      >
+        <DatePicker />
       </Form.Item>
-      <Form.Item label="Hora da Consulta">
-        <TimePicker onChange={(time) => setHoraConsulta(time)} />
+      <Form.Item
+        label="Hora da Consulta"
+        name="horaConsulta"
+        rules={[{ required: true, message: "Por favor, selecione a hora da consulta!" }]}
+      >
+        <TimePicker />
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit">
+        <Button type="primary" htmlType="submit" disabled={!medicoId || !pacienteId}>
           Agendar Consulta
         </Button>
       </Form.Item>
